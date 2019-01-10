@@ -244,3 +244,231 @@ Query the database
 Inserts, Updates, Deletes 
 Export CSV, Render JSON, XML 
 
+One of the powerful features of web2py is its ingerated database adminstration tools.   
+
+You can access the csv file we are going to use at the following link: https://www.briandunning.com/sample-data/
+
+Choosing the free US 500 record data will work for now no need to make an investment at this time. 
+
+We wil have the following field names: first_name, last_name, company_name, address, city, country, state_name, zip, phone1, phone2 email, web. 
+
+- Start server if you do not have it up still. Go to your application and edit it.
+-  We will then want to create a new table directly below the blog table inside of the db.py file 
+-  Name the file contacts and for now just create a Field for each field we will need. first_name, last_name, company_name, address, city, country, state_name, zip, phone1, phone2 email, web.
+-  Use the previously created table as your guide to accomplish this web development is not very difficult but it does require repetition to gain mastery. 
+-  We don't have to worry about validation at this point however you can implement some validation if you like. For example the validator IS_EMAIL could be useful. But for the most part each field will require text. 
+-  Next lets go back to our page that shows all of our applications files
+-  click button directly under models database administration 
+-  click on the db.contacts you just created
+-  We are going to import the csv file that you either created on your own or downloaded. 
+-  click choose file at the bottom of the page in the Import/Export section and then find our csv file and click import. 
+
+- The data should be uploaded at this point. However, the only way you can see it is by going back to the main page and coming back into the database adminstration and then   
+
+
+We are now ready to query our data. 
+
+- equals(==)
+- inequality (>, <, >=, <=)
+- not(~)
+- startswith 
+- and(&) or (|)
+
+Lets start over to the models and click the database Administration button 
+
+- Navigate to the db.contacts within database Administration. You may have already noticed but there is a query section available at the top. Likely by default you will see db.contacts.id>0 which should show all the rows of the table since the id count starts at 1. 
+- here we can do db.contacts.id ==  5   
+- db.contacts.first_name == 'James'
+- db.contacts.state_name == 'CA'
+- (db.contacts.state_name == 'CA') & (db.contacts.id < 100) this gets a compound and we can find where all are  CA and less than 100. 
+- (db.contacts.state_name == 'CA') | (db.contacts.state_name == 'LA')
+- startswith is a string function in python   
+- db.contacts.first_name.startswith('A') will return all records that starts with A. 
+
+
+From within the database Administration we can add new records with the new record button. This is similar to how we added a post only instead of adding as a user we are adding as an database administrator. 
+
+- Go to the db.py file and edit it
+- If you have not done so already let's go ahead and add requires = IS_EMAIL() to the email Field. 
+
+**PRACTICE UPDATING AND DELETING**
+- Go back inside the database Adminstration and choose the db.contacts application. For practice create a new record. 
+- We can update records within the database administration, click on the id and then make the changes. Deleting works the same way. 
+- You can update or delete several records at a time by querying. 
+- in the update field you can type in the field say last_name = "Jones" and all the queries that match whatever you put in the query section will have an updated last_name. Or deleted if you check that box. 
+
+**EXPORT DATA AND RENDER AS HTML JSON XML**
+
+- Start by creating a new controller  call it contacts 
+- Add the following function: 
+
+      def data():
+        rows = db(db.contacts).select()
+        return locals()  
+
+
+All we are doing above is selecing all the rows and return them as a variable. 
+
+- Now lets take a look at the view.  This time we won't create a view to teach a method of viewing the data without doing so.   Just go to servername/AppName/contacts/data.html  This is a default view that web2py provides. 
+- change the .html to .json you will get a different view but the data will render. Looks a bit sloppy unless you have a beatiful json extension for your browser. 
+- now change it to .xml
+Very powerful. 
+
+Now lets export. 
+- Pretty simple and straightforwards go back to the database administration
+- click on the  db.contacts 
+- click export as csv file 
+- download begins and ends producing your data likely in your downloads folder 
+
+Now lets update delete using code so that a user can perform these CRUD operations. We will also work on filtering with code sorting as well. 
+
+# **Create.Read.Update.Delete**
+
+**format**
+
+    rows = db(db.tablename).select()
+
+The code above retrives records from the table. tablename is our table like blog or contacts. This code will receive all of the records.  
+
+In between select()  we can order the records we receive. 
+
+**Symbols**
+- And = & 
+- Or = |
+- Secondary Sort Order |
+- equalities == 
+- Inequalities >, <, >= <=
+- Not or Descending Order ~
+
+Let's get started most of the above should be a recap this far in the readme.
+
+- Navigate to the contacts.py file. 
+- edit the file and lets add in a filter function 
+- I will show this code and then explain what it is doing: 
+
+        def filter():
+            #get count
+            rows1_count = db(db.contacts).count()
+            #get all records, sorted by name
+            rows2_all_sorted_by_name = db(db.contacts).select(orderby=~db.contacts.last_name | db.contacts.first_name)
+            #filter, show only those whose last_name starts with M
+            rows3_startswith = db(db.contacts.last_name.startswith('M')).select(orderby=db.contacts.state_name | db.contacts.last_name)
+            return locals()
+
+There are some comments in the code that explains whats going on here. However to make it easier lets view the data. We do this again without creating a view just to test if the data is showing up how we desire it. 
+Just go to serverName/appName/contacts/filter 
+This will provide us with three paramaters  rows1_count   rows2_all_sorted_by_name and rows3_startswith. All of the data will be shown next to the variable name after the colon : 
+
+Now that we can see what the data looks like lets go back to the contacts.py and edit the filter function. 
+
+- edit the rows1_count so that it only counts the rows with the state_name is equal to 'CA'
+
+        rows1_count = db(db.contacts.state_name == 'CA').count() 
+- if you were unsure exactly at what were doing with rows1_count you will see the number has changed from our total of the entire database to a much smaller number now that we are only counting the rows with state_name equals "CA". 
+- Now update rows2_all_sorted_by_name Lets first go over it.  We are choosing to sort by descending order using the not operator ~.  The | is a secondary sort that will come into play if there is a tie. Basically when there is a row with the same last_name. The secondary sort will sort by the first name meaning you will likely see Ashley Jones before Mark Jones if they were in the table.  Secondary sorts only work for duplicates cases. 
+- rows3_startswith is grabbing all of the rows that start with letter M for the last_name field. Then the code tells the results to be ordered by state_name as primary and when the state matches(when their are duplicates) as a secondary sort it will work with the last name. 
+- Now lets  add a variable  rows4_by_state  lets make it grab rows that do not equal 'CA' remember we cannot use pythons !=  but   ~  == has to be used in conjunction with the fieldname and table name. 
+- Also order the results by last name as primary sort and first_name as secondary sort.  Remember order is done using the orderby argument in the .select method. Also note that the | seperates the primary and secondary order types. 
+
+        rows4_by_state = db(~(db.contacts.state_name == 'CA')).select(orderby=db.contacts.last_name | db.contacts.first_name)
+
+- Now lets create a new variable rows5_combo make it equal something that gets all rows with the state_name 'CA' and (note you have to use &) last_name startswith 'A'   order the results by last_name. 
+
+        rows5_combo = db((db.contacts.state_name=='CA') & (db.contacts.last_name.startswith('A'))).select(orderby=db.contacts.last_name)
+Please don't forget that the new variables have to come before the return locals() statement. 
+
+
+**Lets put it all together in a contacts application using CRUD**
+
+We want to be able to do the following:
+
+**Application design**
+- Add 
+- View All 
+- View Starts With 
+- Update
+
+Lets go to the contacts.py and click edit to begin. 
+
+- lets create a way to add to the database. Remember SQLFORM creates a validated form for us.  
+
+        def add():
+            form = SQLFORM(db.contacts).process()
+            return locals()
+
+- Now because we want this to be a feature in our application we need to create a corresponding view. Remember controllername which is contacts / view name lets use add as the view name   contacts/add
+- We now to update the view page so that we have our form  
+- update the header and the python return variable 
+- Click try view to preview or go to servername/apppname/contacts/add 
+
+**Next we will create a view page and method**
+
+- Go back to contacts.py and edit the file. 
+- create a view function that checks if there are 0 arguments
+- if there are 0 arguments create rows variable and have it select every row from the contacts table. 
+- else  create  variable letter equal to the 0 index argument
+- then have rows return the last_name that starts with the letter variable and order the results by last_name as primary and first_name as secondary 
+- return locals() 
+
+        def view():
+            if request.args(0) is None:
+                rows = db(db.contacts).select(orderby=db.contacts.last_name | db.contacts.first_name)
+            else: 
+                letter = request.args(0)
+                rows = db(db.contacts.last_name.startswith(letter)).select(orderby=db.contacts.last_name | db.contacts.first_name)
+            return locals()
+
+What we have done here is allowed our code to be dynamic and select what the user inputs or provides us.   by adding /and a letter to the end of the view we can then filter the data.
+
+Again we can go to servername/appName/contacts/view without creating a view to test the code before we start building the view. 
+
+Alright lets move forward to our view page now that everything looks as it should. 
+
+We are going to only have three of the fields show  name address and web. 
+name will actually be the last_name, first name  and we will include links to edit the name and the web. 
+
+- Create a new view called view (remember the controllername/  comes first)
+- we want to create a header for the page 
+- next create a table for the page give it the class name 'table table-striped table-hover'  this will use bootstrap for us. 
+- next set the first table row with the header  Name Address and Web 
+- next start a for loop  remember {{for x in rows}} rows is a variable returning back to us the every row in the table. 
+- next  create a new row  
+- let the table rows  feature the last_name comma first_name 
+- address and web 
+- wrap the web and name in a tags  
+- for web the href = '{{=x.web}}
+- for the name href = '/{{request.application}}/{{request.controller}}/update/{{=x.id}}'
+
+Lets break down the names href.  So if you did the first repo readme when we created a simple application we discussed the request object and everything that is featured on it.  request.application pretty much is our application name. its away to provide your application name without typing the exact name. Same with the controller  our controller is contacts in this case but the way the code is set up we could take this code and paste it into any application and it would work just the same.   We then have the keyword update which is a view as we know.  We then take the id and add it as an arg.  Basically if anyone clicks on the name we will go to the update page for that row in the table. 
+
+
+- don't forget {{ pass }} place this before the end of the table element. 
+
+
+- next after our header and before our table add four links 
+- one for add 
+- one for view/A 
+- one for view/B
+- one for view/C
+- Remember how we did this with the href for the name and try to implement this yourself without looking at the view.html file. 
+- what this will do is give us the ability to filter by letter add or add a new record.  If you feel up to it add a fitler for each letter of the alphabet. 
+
+- Also create a link for all records. 
+
+- next we want to work with the update page. 
+- we will first add the udpate function 
+
+        def update():
+            record = db.contacts(request.args(0)) or redirect(URL('view'))
+            form = SQLFORM(db.contacts, record)
+            if form.process().accepted:
+                response.flash = T('Record Updated')
+            else:
+                response.flash = T('Please complete the form.')
+            return locals()
+
+- we will then create a update view using the same naming convention we have been using. 
+
+
+
+
