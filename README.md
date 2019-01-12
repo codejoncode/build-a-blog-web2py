@@ -469,6 +469,48 @@ Lets break down the names href.  So if you did the first repo readme when we cre
 
 - we will then create a update view using the same naming convention we have been using. 
 
+# Role Based Access Control 
+
+Web2py includes adminstrative features that make it easy to manage accounts users groups and access control. 
+
+- Accounts 
+- Security 
+- Groups 
+- Access
+
+We can create accounts  hash passwords have groups access certain information.  The goal is to provide secure access to the appropriate account. Users will log on to create their own account. Administrators assign permissions and create user groups. This is all based off Authorization tables. 
+
+**@auth.requires_membership("admin")** requires an admin group to access.  
+
+**@auth.requires_login()** requires that a member be logged in to access the actual group doesn't matter. 
+
+**Account Registration** 
+Users can automatically register and manage their accounts. 
+
+To access the adminstrative toosl: 
+- From inside the server adminstrative account edit the application. 
+- Then at the top under models click database administration. 
+- You will then go behind the scenes once again and see the various tables. Now they won't look like but see the tables relational database png. On web2py server it will look like simple links but behind the scenes it loks more like the image provided. 
+- db.auth-user user account information, first name last name email password and other account information.
+- auth_group is controlled by admins manager groups we will create a blog_poster group. 
+-  use the login butt to sign up after creating a user name you will be logged in and your user name will show up in the right corner. 
+-  behind the scenes we can edit the user but we can't access the password. Even the administrator won't be able to see it. 
+-  We need to go to the auth_group and then click new record.  
+-  The role will be the group name 
+-  Give it a description then create. 
+-  go back to the auth_group section by clicking the link 
+-  Now you should be able to see your new group/role. 
+-  the next step is to create a membership that associates the group we created with the account. 
+-  go back to the database adminstration and click auth_membership 
+-  you will see members and their assoication with a group. 
+-  click new record 
+-  choose a user then choose the group to associate with that user. 
+-  go back to the membership list to verify you were successful. 
+-  Now we need to make sure that a user attempting to post cannot do so unless they are part of the blog poster group. 
+-  Again   **@auth.requires_membership('admin')**  requires that you are an adminstrator 
+-  **@auth.requires_login()** requires that you are logged in. 
+-  We can use the above bolded lines to ensure these guidelines are met in order to visit certain pages and or perform certain actions.
+
 
 
 
