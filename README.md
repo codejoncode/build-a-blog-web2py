@@ -510,6 +510,44 @@ To access the adminstrative toosl:
 -  Again   **@auth.requires_membership('admin')**  requires that you are an adminstrator 
 -  **@auth.requires_login()** requires that you are logged in. 
 -  We can use the above bolded lines to ensure these guidelines are met in order to visit certain pages and or perform certain actions.
+-  In our case our poster group will replace 'admin'
+-  We need to go to the blog controller now. 
+- We are going to be using decorators whre you add our line just before the function. 
+
+
+        @auth.requires_membership('blog_poster')
+        def post():
+            form = SQLFORM(db.blog).process()
+            return locals()
+
+        @auth.requires_login()
+        def view():
+            rows = db(db.blog).select(orderby=~db.blog.id)
+            return locals()
+
+
+What you will notice is thatwe just simply add the line above our function that is already present. 
+
+Now when you got to the page if you are not logged in it will prompt you to login or sign up. 
+
+Attempting to post  without being logged in will redirect you to the login page. 
+
+- Go ahead and add a line that will require the logged in user to be in the blog_poster group to update a post. 
+- create a new user and try to go to the post page
+- You should see a Not authorized Insufficient privileges. 
+
+
+**Recapping**
+- Role base access control == Databas tables
+-  Third Party Authentication can be intergrated. 
+-  Google, PAM, LDAP, Facebook, LinkedIN, Dropbox, OpenID and more. 
+-  Groups and membership can be established 
+-  Account registration and login. 
+
+https://codejoncode.pythonanywhere.com/blog_contacts/ 
+
+updated link to the code featuring a blog and contacts.  
+
 
 
 
